@@ -394,16 +394,11 @@ export const StudentDashboard: React.FC = () => {
               exit="hidden"
             >
               {showSettings ? (
-                <motion.div 
-                  variants={itemVariants} 
-                  className="bg-black/80 backdrop-blur-lg border border-primary-800/20 p-6 rounded-2xl shadow-xl mx-4"
-                >
-                  <ProfileSettings
-                    user={user!}
-                    onSave={handleProfileUpdate}
-                    onClose={() => setShowSettings(false)}
-                  />
-                </motion.div>
+                <ProfileSettings
+                  user={user!}
+                  onSave={handleProfileUpdate}
+                  onClose={() => setShowSettings(false)}
+                />
               ) : course ? (
                 <motion.div 
                   variants={itemVariants} 
@@ -413,7 +408,6 @@ export const StudentDashboard: React.FC = () => {
                     course={course}
                     onBack={() => changeView(null)}
                     email={user?.email}
-                    name={user?.name}
                   />
                 </motion.div>
               ) : (
