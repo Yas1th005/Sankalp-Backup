@@ -9,30 +9,32 @@ const CourseCard = lazy(() => import('../components/CourseCard'));
 const CourseDetails = lazy(() => import('../components/CourseDetails'));
 const ProfileSettings = lazy(() => import('../components/ProfileSettings'));
 
-// Optimized THREE.js configuration for better performance
+// Optimized THREE.js configuration for better performance (same as Hero)
 const setupThreeJS = (mountElement: HTMLDivElement) => {
   const isMobile = window.innerWidth < 768;
-  const particlesCount = isMobile ? 1000 : 2000; // Reduced particle count
+  const particlesCount = isMobile ? 800 : 3000;
   
   const scene = new THREE.Scene();
   
   const camera = new THREE.PerspectiveCamera(
-    isMobile ? 85 : 75, 
+    isMobile ? 60 : 75, 
     window.innerWidth / window.innerHeight, 
     0.1, 
     1000
   );
-  camera.position.z = isMobile ? 6 : 5;
+  camera.position.z = isMobile ? 7 : 5;
   
   const renderer = new THREE.WebGLRenderer({ 
     alpha: true, 
-    antialias: !isMobile, 
-    powerPreference: 'high-performance'
+    antialias: isMobile ? false : true,
+    powerPreference: "high-performance",
+    precision: isMobile ? "lowp" : "mediump",
+    failIfMajorPerformanceCaveat: false
   });
   
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   
   mountElement.appendChild(renderer.domElement);
   
@@ -40,17 +42,20 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
   const posArray = new Float32Array(particlesCount * 3);
   
   for (let i = 0; i < particlesCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * (isMobile ? 12 : 15);
+    posArray[i] = (Math.random() - 0.5) * (isMobile ? 10 : 15);
   }
   
   particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  particlesGeometry.setDrawRange(0, particlesCount);
   
   const particlesMaterial = new THREE.PointsMaterial({
-    size: isMobile ? 0.05 : 0.03,
+    size: isMobile ? 0.1 : 0.03,
     color: 0x7c3aed,
     transparent: true,
-    opacity: 0.4,
-    blending: THREE.AdditiveBlending
+    opacity: 0.5,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    sizeAttenuation: true
   });
   
   const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -58,6 +63,10 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
   
   const ambientLight = new THREE.AmbientLight(0x7c3aed, 0.5);
   scene.add(ambientLight);
+  
+  const pointLight = new THREE.PointLight(0x7c3aed, 0.8);
+  pointLight.position.set(2, 3, 4);
+  scene.add(pointLight);
   
   let resizeTimeout: NodeJS.Timeout;
   const handleResize = () => {
@@ -72,16 +81,18 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
   window.addEventListener('resize', handleResize);
   
   let animationId: number;
-  let lastTime = 0;
+  let lastFrameTime = 0;
+  const frameInterval = isMobile ? 40 : 16;
+  
   const animate = (currentTime: number) => {
-    if (currentTime - lastTime < 16.67) { // Cap at ~60fps
+    if (currentTime - lastFrameTime < frameInterval) {
       animationId = requestAnimationFrame(animate);
       return;
     }
-    lastTime = currentTime;
+    lastFrameTime = currentTime;
     
-    particlesMesh.rotation.x += 0.0002;
-    particlesMesh.rotation.y += 0.0002;
+    particlesMesh.rotation.x += isMobile ? 0.0001 : 0.0005;
+    particlesMesh.rotation.y += isMobile ? 0.0001 : 0.0005;
     
     renderer.render(scene, camera);
     animationId = requestAnimationFrame(animate);
@@ -92,7 +103,9 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
   return () => {
     window.removeEventListener('resize', handleResize);
     cancelAnimationFrame(animationId);
-    mountElement.removeChild(renderer.domElement);
+    if (mountElement.contains(renderer.domElement)) {
+      mountElement.removeChild(renderer.domElement);
+    }
     
     scene.remove(particlesMesh);
     particlesGeometry.dispose();
@@ -105,7 +118,7 @@ const setupThreeJS = (mountElement: HTMLDivElement) => {
 const LoadingFallback = () => (
   <div className="flex items-center justify-center p-4">
     <motion.div
-      className="w-6 h-6 border-2 border-primary-400 rounded-full"
+      className="w-6 h-6 border-2 border-primary-400 rounded-full border-t-transparent"
       animate={{ rotate: 360 }}
       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
     />
@@ -129,7 +142,7 @@ const itemVariants = {
   }
 };
 
-// First, let's add proper type definitions to avoid type errors
+// Type definitions (keeping exactly as original)
 interface Course {
   id: number;
   title: string;
@@ -137,7 +150,6 @@ interface Course {
   duration: string;
   level: string;
   image?: string;
-  // Add other fields as needed
 }
 
 interface Module {
@@ -146,7 +158,6 @@ interface Module {
   title: string;
   description: string;
   day: number;
-  // Add other fields as needed
 }
 
 interface Material {
@@ -154,7 +165,6 @@ interface Material {
   moduleId: number;
   courseId: number;
   material: string;
-  // Add other fields as needed
 }
 
 export const StudentDashboard: React.FC = () => {
@@ -167,8 +177,41 @@ export const StudentDashboard: React.FC = () => {
   const [courseModules, setCourseModules] = useState<Module[]>([]);
   const [modulesMaterials, setModulesMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLowPerfDevice, setIsLowPerfDevice] = useState(false);
+  const [animationInitialized, setAnimationInitialized] = useState(false);
   
-  // Fetch courses from backend
+  // Initialize THREE.js background animation
+  useEffect(() => {
+    const checkPerformance = () => {
+      let canvas = document.createElement('canvas');
+      let hasWebGL = false;
+      
+      try {
+        hasWebGL = !!(window.WebGLRenderingContext && 
+          (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch (e) {
+        hasWebGL = false;
+      }
+      
+      const isLowPerf = !hasWebGL;
+      setIsLowPerfDevice(isLowPerf);
+      return isLowPerf;
+    };
+    
+    const isLowPerf = checkPerformance();
+    
+    if (!isLowPerf && mountRef.current && !animationInitialized) {
+      const timer = setTimeout(() => {
+        const cleanup = setupThreeJS(mountRef.current!);
+        setAnimationInitialized(true);
+        return cleanup;
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [animationInitialized]);
+  
+  // Fetch courses from backend (keeping exactly as original)
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -186,7 +229,7 @@ export const StudentDashboard: React.FC = () => {
     fetchCourses();
   }, []);
   
-  // Fetch course modules when a course is selected
+  // Fetch course modules when a course is selected (keeping exactly as original)
   useEffect(() => {
     if (selectedCourse) {
       const fetchCourseModules = async () => {
@@ -210,6 +253,7 @@ export const StudentDashboard: React.FC = () => {
     }
   }, [selectedCourse]);
 
+  // Handle profile update (keeping exactly as original)
   const handleProfileUpdate = async (userData: Partial<User>) => {
     try {
       // Update local state immediately for better UX
@@ -226,7 +270,7 @@ export const StudentDashboard: React.FC = () => {
     }
   };
 
-  // Prepare course data with modules and materials
+  // Prepare course data with modules and materials (keeping exactly as original)
   const course = selectedCourse ? {
     ...courses.find(c => c.id.toString() === selectedCourse),
     modules: courseModules.map(module => ({
@@ -248,8 +292,37 @@ export const StudentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-300">
-      <nav className="bg-dark-200 border-b border-primary-800/20">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Background animation container - same as Hero */}
+      <div 
+        ref={mountRef} 
+        className="absolute inset-0 z-0" 
+        style={{ pointerEvents: 'none' }} 
+      />
+      
+      {/* Fallback background for low-performance devices - same as Hero */}
+      {isLowPerfDevice && (
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-purple-900/20 to-black">
+          <div className="absolute w-full h-full overflow-hidden">
+            {[...Array(50)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute bg-purple-500 rounded-full opacity-70"
+                style={{
+                  width: Math.random() * 4 + 1 + 'px',
+                  height: Math.random() * 4 + 1 + 'px',
+                  top: Math.random() * 100 + '%',
+                  left: Math.random() * 100 + '%',
+                  animation: `float ${Math.random() * 10 + 20}s linear infinite`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Bar */}
+      <nav className="relative z-20 bg-black/80 backdrop-blur-lg border-b border-primary-800/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -263,27 +336,45 @@ export const StudentDashboard: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 20px rgba(124, 58, 237, 0.3)"
+                }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowSettings(true)}
-                className="btn-secondary rounded-lg px-4 py-2 flex items-center"
+                className="border-2 border-gray-700 text-gray-300 px-4 py-2 rounded-full font-medium hover:border-primary-600 hover:text-primary-400 transition-all duration-300 flex items-center relative overflow-hidden"
               >
+                <motion.span
+                  className="absolute inset-0 bg-primary-600/10"
+                  initial={{ scale: 0 }}
+                  whileHover={{ scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
                 <Settings className="w-5 h-5 mr-2" />
                 Settings
               </motion.button>
               <motion.div 
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center text-gray-400"
+                className="flex items-center text-gray-300 bg-primary-900/30 px-4 py-2 rounded-full"
               >
-                <User className="w-5 h-5 mr-2" />
+                <User className="w-5 h-5 mr-2 text-primary-400" />
                 <span>{user?.name}</span>
               </motion.div>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 20px rgba(239, 68, 68, 0.3)"
+                }}
                 whileTap={{ scale: 0.95 }}
                 onClick={logout}
-                className="btn-secondary rounded-lg px-4 py-2 flex items-center"
+                className="bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700 transition-all duration-300 flex items-center relative overflow-hidden"
               >
+                <motion.span
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.5 }}
+                />
                 <LogOut className="w-5 h-5 mr-2" />
                 Logout
               </motion.button>
@@ -292,7 +383,8 @@ export const StudentDashboard: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <AnimatePresence mode="wait">
           <Suspense fallback={<LoadingFallback />}>
             <motion.div
@@ -302,7 +394,10 @@ export const StudentDashboard: React.FC = () => {
               exit="hidden"
             >
               {showSettings ? (
-                <motion.div variants={itemVariants} className="card p-6">
+                <motion.div 
+                  variants={itemVariants} 
+                  className="bg-black/80 backdrop-blur-lg border border-primary-800/20 p-6 rounded-2xl shadow-xl mx-4"
+                >
                   <ProfileSettings
                     user={user!}
                     onSave={handleProfileUpdate}
@@ -310,7 +405,10 @@ export const StudentDashboard: React.FC = () => {
                   />
                 </motion.div>
               ) : course ? (
-                <motion.div variants={itemVariants} className="card p-6">
+                <motion.div 
+                  variants={itemVariants} 
+                  className="bg-black/80 backdrop-blur-lg border border-primary-800/20 p-6 rounded-2xl shadow-xl mx-4"
+                >
                   <CourseDetails
                     course={course}
                     onBack={() => changeView(null)}
@@ -322,19 +420,27 @@ export const StudentDashboard: React.FC = () => {
                 <>
                   <motion.h2 
                     variants={itemVariants}
-                    className="text-xl font-bold text-primary-400 mb-6"
+                    className="text-3xl font-bold text-primary-400 mb-8 text-center"
                   >
                     Available Courses
                   </motion.h2>
                   {loading ? (
                     <LoadingFallback />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <motion.div 
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4"
+                      variants={containerVariants}
+                    >
                       {courses.map((course, index) => (
                         <motion.div
                           key={course.id}
                           variants={itemVariants}
-                          className="bg-dark-100 rounded-lg p-4 border border-primary-800/20"
+                          className="bg-black/80 backdrop-blur-lg rounded-2xl p-6 border border-primary-800/20 shadow-xl hover:border-primary-600/40 transition-all duration-300"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 30px rgba(124, 58, 237, 0.2)"
+                          }}
+                          whileTap={{ scale: 0.98 }}
                         >
                           <CourseCard
                             course={{
@@ -349,7 +455,7 @@ export const StudentDashboard: React.FC = () => {
                           />
                         </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
                   )}
                 </>
               )}
@@ -357,6 +463,27 @@ export const StudentDashboard: React.FC = () => {
           </Suspense>
         </AnimatePresence>
       </main>
+
+      {/* Add CSS for the fallback animation - same as Hero */}
+      <style jsx global>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0) translateX(0);
+          }
+          25% {
+            transform: translateY(-100px) translateX(50px);
+          }
+          50% {
+            transform: translateY(-50px) translateX(100px);
+          }
+          75% {
+            transform: translateY(-150px) translateX(50px);
+          }
+          100% {
+            transform: translateY(0) translateX(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
