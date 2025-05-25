@@ -59,118 +59,156 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onSave, 
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="card p-6 max-w-2xl mx-auto"
-    >
-      <div className="flex justify-between items-center mb-6">
-        <motion.h2 
-          initial={{ x: -20 }}
-          animate={{ x: 0 }}
-          className="text-2xl font-bold text-primary-400"
-        >
-          Profile Settings
-        </motion.h2>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-200"
-        >
-          <X className="w-6 h-6" />
-        </motion.button>
-      </div>
-
-      {error && (
-        <div className="bg-red-500/20 text-red-400 p-3 rounded-lg mb-4">
-          {error}
-        </div>
-      )}
-      
-      {success && (
-        <div className="bg-green-500/20 text-green-400 p-3 rounded-lg mb-4">
-          {success}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mb-4"
-        >
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="name">
-            Full Name
-          </label>
-          <input
-            className="input w-full rounded-lg"
-            id="name"
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mb-4"
-        >
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            className="input w-full rounded-lg"
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mb-6"
-        >
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="phone">
-            Phone Number
-          </label>
-          <input
-            className="input w-full rounded-lg"
-            id="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="flex justify-end"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary py-2 px-4 rounded-lg flex items-center shadow-lg shadow-primary-500/30"
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm h-screen flex items-center justify-center p-4 z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-gray-900 border border-gray-700/50 rounded-2xl shadow-2xl shadow-black/50 p-8 max-w-md w-full max-h-[90vh] overflow-y-auto"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
           >
-            <Save className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
+            <p className="text-gray-400 text-sm mt-1">Update your personal information</p>
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.1, backgroundColor: 'rgba(75, 85, 99, 0.5)' }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors p-2 rounded-full"
+          >
+            <X className="w-5 h-5" />
           </motion.button>
-        </motion.div>
-      </form>
-    </motion.div>
+        </div>
+
+        {/* Status Messages */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+              {error}
+            </div>
+          </motion.div>
+        )}
+        
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl mb-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
+              {success}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="name">
+              Full Name
+            </label>
+            <input
+              className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+              id="name"
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="email">
+              Email Address
+            </label>
+            <input
+              className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+              id="email"
+              type="email"
+              placeholder="Enter your email address"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+            />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <label className="block text-gray-200 text-sm font-semibold mb-3" htmlFor="phone">
+              Phone Number
+            </label>
+            <input
+              className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
+              id="phone"
+              type="tel"
+              placeholder="Enter your phone number"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex gap-3 pt-4"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 border border-gray-600/30"
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02, boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)' }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 transition-all duration-200 disabled:shadow-none disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </motion.button>
+          </motion.div>
+        </form>
+      </motion.div>
+    </div>
   );
 };
 
