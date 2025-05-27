@@ -94,7 +94,7 @@ const updatePageSEO = (route) => {
     // Update canonical URL
     let canonicalLink = document.querySelector('link[rel="canonical"]');
     if (canonicalLink) {
-      canonicalLink.setAttribute('href', `${window.location.origin}${canonical}`);
+      canonicalLink.setAttribute('href', `https://sankalp.spectov.in${canonical}`);
     }
     
     // Update Open Graph tags
@@ -110,7 +110,7 @@ const updatePageSEO = (route) => {
     
     let ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) {
-      ogUrl.setAttribute('content', `${window.location.origin}${canonical}`);
+      ogUrl.setAttribute('href', `https://sankalp.spectov.in${canonical}`);
     }
   }
 };
@@ -149,7 +149,7 @@ const addBreadcrumbStructuredData = (path) => {
     "@type": "ListItem",
     "position": 1,
     "name": "Home",
-    "item": `${window.location.origin}/`
+    "item": "https://sankalp.spectov.in/"
   });
   
   // Add path segments
@@ -161,7 +161,7 @@ const addBreadcrumbStructuredData = (path) => {
       "@type": "ListItem",
       "position": index + 2,
       "name": name,
-      "item": `${window.location.origin}${currentPath}`
+      "item": `https://sankalp.spectov.in${currentPath}`
     });
   });
   
@@ -220,7 +220,7 @@ measurePerformance();
 // Add sitemap generation helper (for dynamic routes)
 const generateSitemapData = () => {
   const sitemapUrls = routes.routes?.map(route => ({
-    url: `${window.location.origin}${route.path}`,
+    url: `https://sankalp.spectov.in${route.path}`,
     changefreq: route.path === '/' ? 'daily' : 'weekly',
     priority: route.path === '/' ? '1.0' : '0.8',
     lastmod: new Date().toISOString().split('T')[0]
@@ -228,6 +228,45 @@ const generateSitemapData = () => {
   
   return sitemapUrls;
 };
+
+// Cross-domain SEO optimization for parent-child relationship
+const addParentDomainSignals = () => {
+  // Add reference to parent domain for SEO benefit
+  const parentDomainReference = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "SpectoV",
+    "url": "https://spectov.in",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Training Programs",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Course",
+            "name": "Sankalp Training Program 2.0",
+            "url": "https://sankalp.spectov.in",
+            "provider": {
+              "@type": "Organization",
+              "name": "SpectoV"
+            }
+          }
+        }
+      ]
+    }
+  };
+  
+  // Add parent domain structured data
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.setAttribute('data-parent-domain', 'true');
+  script.textContent = JSON.stringify(parentDomainReference);
+  document.head.appendChild(script);
+};
+
+// Initialize parent domain signals
+addParentDomainSignals();
 
 // Export sitemap data for potential use
 window.sitemapData = generateSitemapData();
