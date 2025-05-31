@@ -88,7 +88,7 @@ const Navbar = () => {
               <Zap className="h-8 w-8 text-primary-400" />
             </motion.div>
             <span className="text-2xl font-bold text-white font-display">
-              Sankalp<span className="text-primary-400">2.0</span>
+              Sankalp<span className="text-primary-400"></span>
             </span>
           </motion.div>
 
