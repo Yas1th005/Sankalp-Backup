@@ -158,7 +158,7 @@ const Founder = () => {
                     transition={{ rotate: { duration: 10, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity, repeatType: "reverse" } }}
                   />
                   <img
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80"
+                    src="/imgf.jpg"
                     alt="Vanshmani Jha"
                     className="h-14 w-14 rounded-full object-cover relative z-10 border-2 border-primary-500"
                   />
@@ -182,7 +182,7 @@ const Founder = () => {
                 transition={{ duration: 15, repeat: Infinity, repeatType: "mirror", ease: "linear" }}
               />
               <motion.img
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+                src="/img2.jpg"
                 alt="Sankalp Training Program Collaboration"
                 className="absolute inset-0 w-full h-full object-cover"
                 initial={{ scale: 1 }}
