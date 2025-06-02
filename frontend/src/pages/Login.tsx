@@ -250,17 +250,7 @@ export const Login: React.FC = () => {
             Admin Login
           </button>
           
-          <button
-            onClick={() => changeView('curriculum')}
-            className={`flex items-center px-6 py-3 rounded-full btn-hover ${
-              view === 'curriculum'
-                ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30 btn-primary'
-                : 'bg-black/80 border-2 border-gray-700 text-gray-300 btn-secondary'
-            }`}
-          >
-            <BookOpen className="w-5 h-5 mr-2" />
-            View Curriculum
-          </button>
+          
         </div>
 
         <div className={`flex justify-center ${viewTransition ? 'view-exit' : isLoaded ? 'view-enter' : 'opacity-0'}`}>
@@ -282,20 +272,7 @@ export const Login: React.FC = () => {
               <RegisterForm onLoginClick={() => changeView('student-login')} />
             </div>
           )}
-          {view === 'curriculum' && (
-            <div className="w-full max-w-6xl content-animation">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockCourses.map((course, index) => (
-                  <div key={course.id} className={`card-animation card-animation-${index + 1}`}>
-                    <CourseCard
-                      course={course}
-                      showCurriculum={true}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          
         </div>
       </div>
     </div>

@@ -371,7 +371,7 @@ const Footer = () => {
                   className="text-gray-400"
                   whileHover={{ color: "#A78BFA" }}
                 >
-                  info@spectov.com
+                  spectov.pvt.ltd@gmail.com 
                 </motion.span>
               </motion.li>
               
@@ -402,7 +402,7 @@ const Footer = () => {
                   className="text-gray-400"
                   whileHover={{ color: "#A78BFA" }}
                 >
-                  +91 98765 43210
+                  +91 70428 60263
                 </motion.span>
               </motion.li>
               
@@ -434,7 +434,7 @@ const Footer = () => {
                   className="text-gray-400"
                   whileHover={{ color: "#A78BFA" }}
                 >
-                  SpectoV Headquarters, Tech Park, Bangalore, India
+                  SpectoV Headquarters, Ghaziabad Loni UP, Chennai, India
                 </motion.span>
               </motion.li>
             </motion.ul>
