@@ -308,7 +308,7 @@ const Hero = () => {
                 >
                   <Typewriter
                     options={{
-                      strings: ['Sankalp 2.0', 'Transform Your Career', 'Learn. Grow. Succeed.'],
+                      strings: ['Sankalp', 'Transform Your Career', 'Learn. Grow. Succeed.'],
                       autoStart: true,
                       loop: true,
                       deleteSpeed: 50,
